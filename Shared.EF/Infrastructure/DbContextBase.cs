@@ -3,7 +3,7 @@ using Shared.Domain.Storage.Abstractions;
 
 namespace Shared.EF.Infrastructure;
 
-public abstract class DbContextBase : DbContext, IUnitOfWork
+public abstract class DbContextBase(DbContextOptions options) : DbContext(options), IUnitOfWork
 {
     Task IUnitOfWork.SaveChangesAsync(CancellationToken cancellationToken = default)
     {

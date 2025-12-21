@@ -34,7 +34,7 @@ public static class ServiceCollectionExtensions
         return services;
     }
 
-    public static IServiceCollection AddDbContext<TDbContext>(this IServiceCollection services) 
+    public static IServiceCollection AddCustomDbContext<TDbContext>(this IServiceCollection services) 
         where TDbContext : DbContext, IUnitOfWork
     {
         services.AddDbContext<TDbContext>((sp, o) =>

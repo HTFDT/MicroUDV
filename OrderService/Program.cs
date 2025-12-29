@@ -1,5 +1,4 @@
 using OrderService.Domain.Storage.Abstractions;
-using OrderService.Infrastructure.Storage;
 using OrderService.Infrastructure.Storage.EFCore;
 using Shared.EF.Helpers;
 

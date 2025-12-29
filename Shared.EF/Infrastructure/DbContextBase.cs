@@ -5,7 +5,7 @@ namespace Shared.EF.Infrastructure;
 
 public abstract class DbContextBase(DbContextOptions options) : DbContext(options), IUnitOfWork
 {
-    Task IUnitOfWork.SaveChangesAsync(CancellationToken cancellationToken = default)
+    Task IUnitOfWork.SaveChangesAsync(CancellationToken cancellationToken)
     {
         return SaveChangesAsync(cancellationToken);
     }

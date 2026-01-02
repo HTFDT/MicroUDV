@@ -1,6 +1,7 @@
 using PaymentService.Domain.Storage.Abstractions;
 using PaymentService.Infrastructure.Storage.EFCore;
 using Shared.EF.Helpers;
+using Shared.Helpers;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -9,6 +10,8 @@ builder.Services.AddSwaggerGen();
 
 builder.Services.AddCustomDbContext<PaymentDbContext>()
     .AddRepository<IPaymentRepository, PaymentRepository>();
+
+builder.Services.AddCqs();
 
 builder.Services.Configure<DbOptions>(o =>
 {

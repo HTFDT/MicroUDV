@@ -1,6 +1,7 @@
 using OrderService.Domain.Storage.Abstractions;
 using OrderService.Infrastructure.Storage.EFCore;
 using Shared.EF.Helpers;
+using Shared.Helpers;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -9,6 +10,8 @@ builder.Services.AddSwaggerGen();
 
 builder.Services.AddCustomDbContext<OrderDbContext>()
     .AddRepository<IOrderRepository, OrderRepository>();
+
+builder.Services.AddCqs();
 
 builder.Services.Configure<DbOptions>(o =>
 {

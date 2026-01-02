@@ -1,4 +1,4 @@
-﻿namespace OrderService.Domain.Types;
+namespace Shared.Domain.Types;
 
 public enum OrderStatus
 {

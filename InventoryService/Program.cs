@@ -8,15 +8,13 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-builder.Services.AddCustomDbContext<InventoryDbContext>()
+builder.Services.AddCustomDbContext<InventoryDbContext>(cfg =>
+{
+    cfg.ConnectionString = builder.Configuration["conn"]!;
+})
     .AddRepository<IProductRepository, ProductRepository>();
 
 builder.Services.AddCqs();
-
-builder.Services.Configure<DbOptions>(o =>
-{
-    o.ConnectionString = builder.Configuration["conn"]!;
-});
 
 var app = builder.Build();
 

@@ -1,4 +1,4 @@
-namespace Shared.Domain.Storage.Types;
+namespace Shared.Domain.Types;
 
 public record Money
 {

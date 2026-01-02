@@ -1,5 +1,6 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
+# 
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OrderService", "OrderService\OrderService.csproj", "{0FA4A31A-9186-4A79-B47E-D3A15794116D}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PaymentService", "PaymentService\PaymentService.csproj", "{9F97D049-4382-4F17-8EBB-7C2C44542B4D}"
@@ -13,6 +14,8 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SagaCoordinator", "SagaCoordinator\SagaCoordinator.csproj", "{0CC159DA-FC37-46D8-B00B-0521D1B84365}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Shared.EF", "Shared.EF\Shared.EF.csproj", "{03AAF8FE-D6CF-4961-91A1-B740367D54E5}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Shared.MT", "Shared.MT\Shared.MT.csproj", "{26907869-0910-4023-A76A-DAB0E237ADC5}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -48,5 +51,9 @@ Global
 		{03AAF8FE-D6CF-4961-91A1-B740367D54E5}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{03AAF8FE-D6CF-4961-91A1-B740367D54E5}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{03AAF8FE-D6CF-4961-91A1-B740367D54E5}.Release|Any CPU.Build.0 = Release|Any CPU
+		{26907869-0910-4023-A76A-DAB0E237ADC5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{26907869-0910-4023-A76A-DAB0E237ADC5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{26907869-0910-4023-A76A-DAB0E237ADC5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{26907869-0910-4023-A76A-DAB0E237ADC5}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

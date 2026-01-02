@@ -8,15 +8,13 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-builder.Services.AddCustomDbContext<NotificationDbContext>()
+builder.Services.AddCustomDbContext<NotificationDbContext>(cfg =>
+{
+    cfg.ConnectionString = builder.Configuration["conn"]!;
+})
     .AddRepository<INotificationRepository, NotificationRepository>();
 
 builder.Services.AddCqs();
-
-builder.Services.Configure<DbOptions>(o =>
-{
-    o.ConnectionString = builder.Configuration["conn"]!;
-});
 
 var app = builder.Build();
 

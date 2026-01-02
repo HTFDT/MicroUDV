@@ -1,6 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Options;
 using Shared.Domain.Storage.Abstractions;
 
 namespace Shared.EF.Helpers;
@@ -34,13 +33,14 @@ public static class ServiceCollectionExtensions
         return services;
     }
 
-    public static IServiceCollection AddCustomDbContext<TDbContext>(this IServiceCollection services) 
+    public static IServiceCollection AddCustomDbContext<TDbContext>(this IServiceCollection services, Action<DbOptions> cfg) 
         where TDbContext : DbContext, IUnitOfWork
     {
+        var opt = new DbOptions();
+        cfg.Invoke(opt);
         services.AddDbContext<TDbContext>((sp, o) =>
         {
-            var dbOptions = sp.GetRequiredService<IOptions<DbOptions>>().Value;
-            o.UseNpgsql(dbOptions.ConnectionString);
+            o.UseNpgsql(opt.ConnectionString);
         });
         services.AddScoped<IUnitOfWork>(sp => sp.GetRequiredService<TDbContext>());
         return services;

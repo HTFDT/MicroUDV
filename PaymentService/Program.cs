@@ -8,15 +8,13 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-builder.Services.AddCustomDbContext<PaymentDbContext>()
+builder.Services.AddCustomDbContext<PaymentDbContext>(cfg =>
+{
+    cfg.ConnectionString = builder.Configuration["conn"]!;
+})
     .AddRepository<IPaymentRepository, PaymentRepository>();
 
 builder.Services.AddCqs();
-
-builder.Services.Configure<DbOptions>(o =>
-{
-    o.ConnectionString = builder.Configuration["conn"]!;
-});
 
 var app = builder.Build();
 

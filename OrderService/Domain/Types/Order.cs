@@ -1,4 +1,5 @@
 ﻿using Shared.Domain.Abstractions;
+using Shared.Domain.Types;
 
 namespace OrderService.Domain.Types;
 

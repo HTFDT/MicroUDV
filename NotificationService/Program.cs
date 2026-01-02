@@ -1,15 +1,26 @@
+using NotificationService.Domain.Storage;
+using NotificationService.Infrastructure.Storage.EFCore;
+using Shared.EF.Helpers;
+
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
+builder.Services.AddCustomDbContext<NotificationDbContext>()
+    .AddRepository<INotificationRepository, NotificationRepository>();
+
+builder.Services.Configure<DbOptions>(o =>
+{
+    o.ConnectionString = builder.Configuration["conn"]!;
+});
+
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
-{
-    app.UseSwagger();
-    app.UseSwaggerUI();
-}
+app.UseSwagger();
+app.UseSwaggerUI();
+
+await using var scope = app.Services.CreateAsyncScope();
+DatabaseUpdater.UpdateDatabase<NotificationDbContext>(scope.ServiceProvider);
 
 await app.RunAsync();

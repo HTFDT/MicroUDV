@@ -12,7 +12,7 @@ using OrderService.Infrastructure.Storage.EFCore;
 namespace OrderService.Infrastructure.Storage.EFCore.Migrations
 {
     [DbContext(typeof(OrderDbContext))]
-    [Migration("20251229193907_Initial")]
+    [Migration("20260103195931_Initial")]
     partial class Initial
     {
         /// <inheritdoc />

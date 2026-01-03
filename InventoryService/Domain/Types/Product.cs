@@ -9,4 +9,5 @@ public class Product : IEntity<Guid>, IAggregateRoot
     public string Name { get; set; } = null!;
     public Money Price { get; set; } = null!;
     public int InStockQuantity { get; set; }
+    public List<Reservation> Reservations { get; set; } = [];
 }

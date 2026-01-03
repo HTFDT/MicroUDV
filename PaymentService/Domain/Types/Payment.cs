@@ -1,5 +1,5 @@
 ﻿using Shared.Domain.Abstractions;
-using Shared.Domain.Storage.Types;
+using Shared.Domain.Types;
 
 namespace PaymentService.Domain.Types;
 

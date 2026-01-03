@@ -12,7 +12,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace NotificationService.Infrastructure.Storage.EFCore.Migrations
 {
     [DbContext(typeof(NotificationDbContext))]
-    [Migration("20260102003423_Initial")]
+    [Migration("20260103200217_Initial")]
     partial class Initial
     {
         /// <inheritdoc />

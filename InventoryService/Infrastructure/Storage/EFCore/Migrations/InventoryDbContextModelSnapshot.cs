@@ -40,9 +40,34 @@ namespace InventoryService.Infrastructure.Storage.EFCore.Migrations
                     b.ToTable("Product");
                 });
 
+            modelBuilder.Entity("InventoryService.Domain.Types.Reservation", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("OrderId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("OrderItemId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("ProductId")
+                        .HasColumnType("uuid");
+
+                    b.Property<int>("Quantity")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ProductId");
+
+                    b.ToTable("Reservation");
+                });
+
             modelBuilder.Entity("InventoryService.Domain.Types.Product", b =>
                 {
-                    b.OwnsOne("Shared.Domain.Storage.Types.Money", "Price", b1 =>
+                    b.OwnsOne("Shared.Domain.Types.Money", "Price", b1 =>
                         {
                             b1.Property<Guid>("ProductId")
                                 .HasColumnType("uuid");
@@ -60,6 +85,22 @@ namespace InventoryService.Infrastructure.Storage.EFCore.Migrations
 
                     b.Navigation("Price")
                         .IsRequired();
+                });
+
+            modelBuilder.Entity("InventoryService.Domain.Types.Reservation", b =>
+                {
+                    b.HasOne("InventoryService.Domain.Types.Product", "Product")
+                        .WithMany("Reservations")
+                        .HasForeignKey("ProductId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Product");
+                });
+
+            modelBuilder.Entity("InventoryService.Domain.Types.Product", b =>
+                {
+                    b.Navigation("Reservations");
                 });
 #pragma warning restore 612, 618
         }

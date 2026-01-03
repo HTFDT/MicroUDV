@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
+using PaymentService.Infrastructure.Storage.EFCore;
 
 #nullable disable
 
@@ -40,7 +41,7 @@ namespace PaymentService.Infrastructure.Storage.EFCore.Migrations
 
             modelBuilder.Entity("PaymentService.Domain.Types.Payment", b =>
                 {
-                    b.OwnsOne("PaymentService.Domain.Types.Money", "Summary", b1 =>
+                    b.OwnsOne("Shared.Domain.Types.Money", "Summary", b1 =>
                         {
                             b1.Property<Guid>("PaymentId")
                                 .HasColumnType("uuid");

@@ -16,5 +16,13 @@ public class InventoryDbContext(DbContextOptions options) : DbContextBase(option
                 b.Property("_value");
                 b.Ignore(m => m.Rub);
             });
+
+        modelBuilder.Entity<Product>()
+            .Navigation(p => p.Reservations)
+            .AutoInclude();
+
+        modelBuilder.Entity<Reservation>()
+            .Navigation(r => r.Product)
+            .AutoInclude();
     }
 }

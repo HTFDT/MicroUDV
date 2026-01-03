@@ -11,4 +11,5 @@ public class TransportOptions
     }
 
     public RabbitMqOptions? RabbitMq { get; set; }
+    public bool IsInMemoryTransport { get; set; }
 }

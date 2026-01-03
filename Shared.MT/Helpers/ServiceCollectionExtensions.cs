@@ -7,18 +7,15 @@ namespace Shared.MT.Helpers;
 
 public static class ServiceCollectionExtensions
 {
-    private static void UsingRabbitMqInternal(this IBusRegistrationConfigurator config, Action<TransportOptions> transportCfg)
+    private static void UsingRabbitMqInternal(this IBusRegistrationConfigurator config, TransportOptions.RabbitMqOptions opts)
     {
-        var opt = new TransportOptions();
-        transportCfg.Invoke(opt);
-
         config.UsingRabbitMq((context, cfg) =>
         {
             cfg.ConfigureEndpoints(context);
-            cfg.Host(opt.RabbitMq!.Host, opt.RabbitMq!.VirtualHost, h =>
+            cfg.Host(opts.Host, opts.VirtualHost, h =>
             {
-                h.Username(opt.RabbitMq!.UserName);
-                h.Password(opt.RabbitMq!.Password);
+                h.Username(opts.UserName);
+                h.Password(opts.Password);
             });
         });
     }
@@ -46,14 +43,17 @@ public static class ServiceCollectionExtensions
 
             x.SetKebabCaseEndpointNameFormatter();
 
-            x.UsingRabbitMqInternal(cfg);
+            if (opt.IsInMemoryTransport)
+                x.UsingInMemory();
+            else
+                x.UsingRabbitMqInternal(opt.RabbitMq!);
 
             x.DefaultAddConfigureEndpointsCallbackInternal();
         });
         return services;
     }
 
-    public static IServiceCollection AddMassTransitTransport<TDbContext>(this IServiceCollection services, Action<TransportOptions> transportCfg, Action<MassTransitOptions> massTransitCfg)
+    public static IServiceCollection AddMassTransitTransportWithSagas<TDbContext>(this IServiceCollection services, Action<TransportOptions> transportCfg, Action<MassTransitOptions> massTransitCfg)
         where TDbContext : DbContext
     {
         var transportOpts = new TransportOptions();
@@ -81,7 +81,10 @@ public static class ServiceCollectionExtensions
 
             x.SetKebabCaseEndpointNameFormatter();
 
-            x.UsingRabbitMqInternal(transportCfg);
+            if (transportOpts.IsInMemoryTransport)
+                x.UsingInMemory();
+            else
+                x.UsingRabbitMqInternal(transportOpts.RabbitMq!);
 
             x.DefaultAddConfigureEndpointsCallbackInternal();
         });

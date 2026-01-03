@@ -12,6 +12,7 @@
     </ItemGroup>
 
     <ItemGroup>
+      <ProjectReference Include="../Shared.EF/Shared.EF.csproj" />
       <ProjectReference Include="../Shared.MT/Shared.MT.csproj" />
     </ItemGroup>
 </Project>

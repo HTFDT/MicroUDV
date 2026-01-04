@@ -2,9 +2,9 @@
 
 namespace OrderService.Domain.Types;
 
-public class OrderItem : IEntity<int>
+public class OrderItem : IEntity<Guid>
 {
-    public int Id { get; init; }
+    public Guid Id { get; init; }
     public int Quantity { get; set; }
     
     public Guid OrderId { get; set; }

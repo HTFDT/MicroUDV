@@ -12,7 +12,7 @@ using OrderService.Infrastructure.Storage.EFCore;
 namespace OrderService.Infrastructure.Storage.EFCore.Migrations
 {
     [DbContext(typeof(OrderDbContext))]
-    [Migration("20260103195931_Initial")]
+    [Migration("20260104183711_Initial")]
     partial class Initial
     {
         /// <inheritdoc />
@@ -69,11 +69,9 @@ namespace OrderService.Infrastructure.Storage.EFCore.Migrations
 
             modelBuilder.Entity("OrderService.Domain.Types.OrderItem", b =>
                 {
-                    b.Property<int>("Id")
+                    b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+                        .HasColumnType("uuid");
 
                     b.Property<Guid>("ItemId")
                         .HasColumnType("uuid");

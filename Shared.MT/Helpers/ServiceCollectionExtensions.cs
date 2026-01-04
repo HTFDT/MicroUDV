@@ -2,6 +2,8 @@ using System.Reflection;
 using MassTransit;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
+using Shared.Application.Infrastructure.Messenging.Abstractions;
+using Shared.MT.Application.Infrastructure.Messenging;
 
 namespace Shared.MT.Helpers;
 
@@ -50,6 +52,11 @@ public static class ServiceCollectionExtensions
 
             x.DefaultAddConfigureEndpointsCallbackInternal();
         });
+
+        services.AddScoped<DefaultMessenger>();
+        services.AddScoped<IMessageSender>(sp => sp.GetRequiredService<DefaultMessenger>());
+        services.AddScoped<IMessageSender>(sp => sp.GetRequiredService<DefaultMessenger>());
+
         return services;
     }
 
@@ -88,6 +95,10 @@ public static class ServiceCollectionExtensions
 
             x.DefaultAddConfigureEndpointsCallbackInternal();
         });
+        
+        services.AddScoped<DefaultMessenger>();
+        services.AddScoped<IMessageSender>(sp => sp.GetRequiredService<DefaultMessenger>());
+        services.AddScoped<IMessageSender>(sp => sp.GetRequiredService<DefaultMessenger>());
 
         return services;
     }

@@ -1,6 +1,6 @@
 using Shared.Application.Infrastructure.Messenging.Abstractions;
 
-namespace Shared.MT.Application.Infrastructure.Messaging;
+namespace Shared.MT.Application.Infrastructure.Messenging;
 
 public abstract class ConsumerBase<TMessage> : MassTransit.IConsumer<TMessage>, IConsumer<TMessage>
     where TMessage : class

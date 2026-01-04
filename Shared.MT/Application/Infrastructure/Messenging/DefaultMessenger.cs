@@ -3,7 +3,7 @@ using Shared.Application.Infrastructure.Messenging.Abstractions;
 
 namespace Shared.MT.Application.Infrastructure.Messenging;
 
-public class DefaultMessenger(IPublishEndpoint publishEndpoint, IBus bus) : IMessageSender, IMessagePublisher
+public class DefaultMessenger(IPublishEndpoint publishEndpoint, ISendEndpointProvider bus) : IMessageSender, IMessagePublisher
 {
     public Task Publish<TMessage>(TMessage message) where TMessage : class
     {

@@ -9,26 +9,39 @@ builder.Services.AddCustomDbContext<SagasDbContext>(cfg =>
     cfg.ConnectionString = builder.Configuration["conn"]!;
 });
 
-builder.Services.AddMassTransitTransportWithSagas<SagasDbContext>(transportCfg =>
+builder.Services.AddMassTransitCustom(b =>
 {
+    b.AddConsumers();
+    var smCfg = b.AddSagas()
+        .AddSagaStateMachines();
+    
     if (builder.Environment.IsDevelopment())
+        smCfg.UsingInMemoryRepository();
+    else
+        smCfg.UsingEntityFrameworkRepository<SagasDbContext>();
+
+    b.AddConfigureEndpointsCallback(o =>
     {
-        transportCfg.IsInMemoryTransport = true;
-        return;
-    }
-    transportCfg.RabbitMq = new TransportOptions.RabbitMqOptions
-    {
-        Host = builder.Configuration["RabbitMq:Host"]!,
-        VirtualHost = builder.Configuration["RabbitMq:VirtualHost"]!,
-        UserName = builder.Configuration["RabbitMq:UserName"]!,
-        Password = builder.Configuration["RabbitMq:Password"]!,
-    };
-}, massTransitCfg =>
-{
-    massTransitCfg.StateMachinesConfig = new MassTransitOptions.SagaStateMachinesConfig
-    {
-        IsInMemoryPersistance = builder.Environment.IsDevelopment()
-    };
+        o.UseInMemoryOutbox = true;
+        o.UseRedelivery = true;
+        o.Retries = 5;
+    });
+
+    if (!builder.Environment.IsDevelopment())
+        b.AddEntityFrameworkOutbox<SagasDbContext>();
+    
+    var transportCfg = b.Transport();
+
+    if (builder.Environment.IsDevelopment())
+        transportCfg.UsingInMemory();
+    else
+        transportCfg.UsingRabbitMq(o =>
+        {
+            o.Host = builder.Configuration["RabbitMq:Host"]!;
+            o.VirtualHost = builder.Configuration["RabbitMq:VirtualHost"]!;
+            o.UserName = builder.Configuration["RabbitMq:UserName"]!;
+            o.Password = builder.Configuration["RabbitMq:Password"]!;
+        });
 });
 
 var host = builder.Build();

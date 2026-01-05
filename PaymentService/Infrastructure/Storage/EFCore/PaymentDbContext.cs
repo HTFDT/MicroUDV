@@ -1,10 +1,11 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using PaymentService.Domain.Types;
 using Shared.EF.Infrastructure;
+using Shared.MT.Infrastructure;
 
 namespace PaymentService.Infrastructure.Storage.EFCore;
 
-public class PaymentDbContext(DbContextOptions options) : DbContextBase(options)
+public class PaymentDbContext(DbContextOptions options) : MassTransitDbContextBase(options)
 {
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

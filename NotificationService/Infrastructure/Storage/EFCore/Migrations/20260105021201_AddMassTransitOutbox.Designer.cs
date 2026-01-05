@@ -2,18 +2,21 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
+using NotificationService.Infrastructure.Storage.EFCore;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
-using PaymentService.Infrastructure.Storage.EFCore;
 
 #nullable disable
 
-namespace PaymentService.Infrastructure.Storage.EFCore.Migrations
+namespace NotificationService.Infrastructure.Storage.EFCore.Migrations
 {
-    [DbContext(typeof(PaymentDbContext))]
-    partial class PaymentDbContextModelSnapshot : ModelSnapshot
+    [DbContext(typeof(NotificationDbContext))]
+    [Migration("20260105021201_AddMassTransitOutbox")]
+    partial class AddMassTransitOutbox
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -190,21 +193,22 @@ namespace PaymentService.Infrastructure.Storage.EFCore.Migrations
                     b.ToTable("OutboxState");
                 });
 
-            modelBuilder.Entity("PaymentService.Domain.Types.Payment", b =>
+            modelBuilder.Entity("NotificationService.Domain.Types.Notification", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
-                    b.Property<Guid>("CustomerId")
-                        .HasColumnType("uuid");
+                    b.Property<string>("Text")
+                        .IsRequired()
+                        .HasColumnType("text");
 
-                    b.Property<Guid>("OrderId")
+                    b.Property<Guid>("UserId")
                         .HasColumnType("uuid");
 
                     b.HasKey("Id");
 
-                    b.ToTable("Payment");
+                    b.ToTable("Notification");
                 });
 
             modelBuilder.Entity("MassTransit.EntityFrameworkCoreIntegration.OutboxMessage", b =>
@@ -217,28 +221,6 @@ namespace PaymentService.Infrastructure.Storage.EFCore.Migrations
                         .WithMany()
                         .HasForeignKey("InboxMessageId", "InboxConsumerId")
                         .HasPrincipalKey("MessageId", "ConsumerId");
-                });
-
-            modelBuilder.Entity("PaymentService.Domain.Types.Payment", b =>
-                {
-                    b.OwnsOne("Shared.Domain.Types.Money", "Summary", b1 =>
-                        {
-                            b1.Property<Guid>("PaymentId")
-                                .HasColumnType("uuid");
-
-                            b1.Property<double>("_value")
-                                .HasColumnType("double precision");
-
-                            b1.HasKey("PaymentId");
-
-                            b1.ToTable("Payment");
-
-                            b1.WithOwner()
-                                .HasForeignKey("PaymentId");
-                        });
-
-                    b.Navigation("Summary")
-                        .IsRequired();
                 });
 #pragma warning restore 612, 618
         }

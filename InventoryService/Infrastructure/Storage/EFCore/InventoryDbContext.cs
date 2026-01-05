@@ -1,10 +1,10 @@
 using InventoryService.Domain.Types;
 using Microsoft.EntityFrameworkCore;
-using Shared.EF.Infrastructure;
+using Shared.MT.Infrastructure;
 
 namespace InventoryService.Infrastructure.Storage.EFCore;
 
-public class InventoryDbContext(DbContextOptions options) : DbContextBase(options)
+public class InventoryDbContext(DbContextOptions options) : MassTransitDbContextBase(options)
 {
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

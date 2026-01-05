@@ -14,7 +14,7 @@ public static class ResultFactory
         {
             result = type.InvokeMember(nameof(Result.Success), BindingFlags.InvokeMethod, null, null, null);
         }
-        else if (type == typeof(Result<>))
+        else if (type.IsGenericType && type.GetGenericTypeDefinition() == typeof(Result<>))
         {
             var valueType = value?.GetType();
             var genericParamType = type.GetGenericArguments().FirstOrDefault();

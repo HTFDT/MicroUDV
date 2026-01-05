@@ -2,6 +2,6 @@
 
 public interface IError
 {
-    string Type { get; }
+    ErrorType Type { get; }
     Dictionary<string, object> Data { get; }
 }

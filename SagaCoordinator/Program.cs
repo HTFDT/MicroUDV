@@ -45,4 +45,8 @@ builder.Services.AddMassTransitCustom(b =>
 });
 
 var host = builder.Build();
+
+await using var scope = host.Services.CreateAsyncScope();
+DatabaseUpdater.UpdateDatabase<SagasDbContext>(scope.ServiceProvider);
+
 host.Run();

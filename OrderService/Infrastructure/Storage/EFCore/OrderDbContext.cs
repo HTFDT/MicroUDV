@@ -1,10 +1,10 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using OrderService.Domain.Types;
-using Shared.EF.Infrastructure;
+using Shared.MT.Infrastructure;
 
 namespace OrderService.Infrastructure.Storage.EFCore;
 
-public class OrderDbContext(DbContextOptions options) : DbContextBase(options)
+public class OrderDbContext(DbContextOptions options) : MassTransitDbContextBase(options)
 {
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

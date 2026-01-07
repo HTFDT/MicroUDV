@@ -1,3 +1,4 @@
+using OrderService.Application.Orders.Commands.CompleteOrder;
 using OrderService.Application.Orders.Commands.CreateOrder.DTOs;
 using OrderService.Domain.Storage.Abstractions;
 using OrderService.Domain.Types;
@@ -15,8 +16,22 @@ public class CreateOrderCommand(CreateOrderDto dto) : Command
     public CreateOrderDto Dto { get; set; } = dto;
 }
 
-public class CreateOrderCommandHandler(IOrderRepository repository, IMessagePublisher publisher) : CommandHandler<CreateOrderCommand>
+public class CreateOrderCommandHandler : CommandHandler<CreateOrderCommand>
 {
+    private readonly IOrderRepository _repository;
+    private readonly IMessagePublisher _publisher;
+    private readonly ILogger<CompleteOrderCommandHandler> _logger;
+
+    public CreateOrderCommandHandler(
+        IOrderRepository repository,
+        IMessagePublisher publisher,
+        ILogger<CompleteOrderCommandHandler> logger)
+    {
+        _repository = repository;
+        _publisher = publisher;
+        _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+    }
+
     protected override async Task<IResult> HandleAsync(CreateOrderCommand request, CancellationToken cancellationToken)
     {
         var order = new Order
@@ -42,7 +57,12 @@ public class CreateOrderCommandHandler(IOrderRepository repository, IMessagePubl
         })
         .ToList();
 
-        await publisher.Publish(new OrderCreated
+        _logger.LogInformation(
+            "Creating order for customer: {CustomerId}, Items: {ItemsCount}",
+            order.Customer.Id,
+            order.Items.Count);
+
+        await _publisher.Publish(new OrderCreated
         {
             OrderId = order.Id,
             CustomerId = order.Customer.Id,
@@ -54,8 +74,12 @@ public class CreateOrderCommandHandler(IOrderRepository repository, IMessagePubl
             }).ToList()
         });
 
-        await repository.AddAsync(order, cancellationToken);
-        await repository.UnitOfWork.SaveChangesAsync(cancellationToken);
+        await _repository.AddAsync(order, cancellationToken);
+        await _repository.UnitOfWork.SaveChangesAsync(cancellationToken);
+
+        _logger.LogInformation(
+            "Order created successfully. OrderId: {OrderId}",
+            order.Id);
 
         return Result.Success();
     }

@@ -54,7 +54,7 @@ public class OrderStateMachine : MassTransitStateMachine<OrderState>
             When(StockReserved)
                 .ThenAsync(async ctx =>
                 {
-                    await ctx.Send(new SetOrderState
+                    await ctx.Send(new SetOrderStatus
                     {
                         OrderId = ctx.Message.OrderId,
                         Status = OrderStatus.Reserved,
@@ -87,7 +87,7 @@ public class OrderStateMachine : MassTransitStateMachine<OrderState>
             When(PaymentSucceeded)
                 .ThenAsync(async ctx =>
                 {
-                    await ctx.Send(new SetOrderState
+                    await ctx.Send(new SetOrderStatus
                     {
                         OrderId = ctx.Message.OrderId,
                         Status = OrderStatus.Paid 

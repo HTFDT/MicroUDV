@@ -1,3 +1,3 @@
 namespace Shared.Application.Infrastructure.Cqs.Abstractions;
 
-public interface ICommand<TResult> : ICqsRequest<TResult>;
+public interface ICqsRequest<TResult> : ICqsRequest;

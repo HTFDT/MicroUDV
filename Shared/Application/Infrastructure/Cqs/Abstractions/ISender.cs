@@ -5,6 +5,6 @@ namespace Shared.Application.Infrastructure.Cqs.Abstractions;
 public interface ISender
 {
     Task<TResult> SendAsync<TRequest, TResult>(TRequest request, CancellationToken cancellationToken = default)
-        where TRequest : IRequest
+        where TRequest : ICqsRequest
         where TResult : IResult;
 }

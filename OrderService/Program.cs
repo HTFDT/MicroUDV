@@ -3,11 +3,23 @@ using OrderService.Infrastructure.Storage.EFCore;
 using Shared.EF.Helpers;
 using Shared.Helpers;
 using Shared.MT.Helpers;
+using Serilog;
 
 var builder = WebApplication.CreateBuilder(args);
 
+Log.Logger = new LoggerConfiguration()
+    .MinimumLevel.Information()
+    .Enrich.FromLogContext()
+    .WriteTo.Console(
+        outputTemplate: "[{Timestamp:HH:mm:ss} {Level:u3}] {Message:lj}{NewLine}{Exception}")
+    .CreateLogger();
+
+builder.Host.UseSerilog();
+
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+
+builder.Services.AddControllers();
 
 builder.Services.AddCustomDbContext<OrderDbContext>(cfg =>
 {
@@ -50,7 +62,11 @@ var app = builder.Build();
 app.UseSwagger();
 app.UseSwaggerUI();
 
+app.MapControllers();
+
 await using var scope = app.Services.CreateAsyncScope();
 DatabaseUpdater.UpdateDatabase<OrderDbContext>(scope.ServiceProvider);
+
+Log.Information("OrderService starting...");
 
 await app.RunAsync();

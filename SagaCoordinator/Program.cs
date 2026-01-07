@@ -44,6 +44,8 @@ builder.Services.AddMassTransitCustom(b =>
         });
 });
 
+EndpointConventionMapper.MapEndpoints();
+
 var host = builder.Build();
 
 await using var scope = host.Services.CreateAsyncScope();

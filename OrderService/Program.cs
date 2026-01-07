@@ -56,6 +56,7 @@ builder.Services.AddMassTransitCustom(b =>
 });
 
 builder.Services.AddCqs();
+EndpointConventionMapper.MapEndpoints();
 
 var app = builder.Build();
 

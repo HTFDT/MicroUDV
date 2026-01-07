@@ -76,7 +76,8 @@ public class OrderStateMachine : MassTransitStateMachine<OrderState>
                     {
                         OrderId = ctx.Message.OrderId,
                         IsSuccessful = false,
-                        Reason = ctx.Message.Reason
+                        Reason = ctx.Message.Reason,
+                        UserId = ctx.Saga.UserId
                     });
                 })
                 .TransitionTo(Failed)
@@ -96,7 +97,8 @@ public class OrderStateMachine : MassTransitStateMachine<OrderState>
                     await ctx.Publish(new OrderCompleted
                     {
                         OrderId = ctx.Message.OrderId,
-                        IsSuccessful = true
+                        IsSuccessful = true,
+                        UserId = ctx.Saga.UserId
                     });
                 })
                 .TransitionTo(Completed)
@@ -109,7 +111,8 @@ public class OrderStateMachine : MassTransitStateMachine<OrderState>
                     {
                         OrderId = ctx.Message.OrderId,
                         IsSuccessful = false,
-                        Reason = ctx.Message.Reason
+                        Reason = ctx.Message.Reason,
+                        UserId = ctx.Saga.UserId
                     });
                 })
                 .TransitionTo(Failed)

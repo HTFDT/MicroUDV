@@ -1,29 +1,15 @@
-using OrderService.Domain.Storage.Abstractions;
+using OrderService.Application.Orders.Commands.CompleteOrder;
+using Shared.Application.Infrastructure.Cqs.Abstractions;
 using Shared.Application.Orders.Messages.Events;
-using Shared.Domain.Types;
 using Shared.MT.Application.Infrastructure.Messenging;
+using IResult = Shared.Application.Infrastructure.Results.Abstractions.IResult;
 
 namespace OrderService.Application.Orders.Consumers;
 
-public class OrderCompletedConsumer(IOrderRepository repository) : ConsumerBase<OrderCompleted>
+public class OrderCompletedConsumer(ISender sender) : ConsumerBase<OrderCompleted>
 {
     public override async Task Consume()
     {
-        var msg = ConsumeContext.Message;
-        var order = await repository.FirstOrDefaultAsync(o => o.Id == msg.OrderId);
-        if (order is null)
-            return;
-
-        if (msg.IsSuccessful)
-        {
-            order.Status = OrderStatus.Completed;
-        }
-        else
-        {
-            await repository.RemoveAsync(order);
-        }
-
-        
-        await repository.UnitOfWork.SaveChangesAsync();
+        await sender.SendAsync<CompleteOrderCommand, IResult>(new CompleteOrderCommand(ConsumeContext.Message));
     }
 }

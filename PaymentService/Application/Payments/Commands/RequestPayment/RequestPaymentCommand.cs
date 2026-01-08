@@ -13,10 +13,27 @@ public class RequestPaymentCommand(RequestPaymentMessage message) : Command
     public RequestPaymentMessage Message { get; set; } = message;
 }
 
-public class RequestPaymentCommandHandler(PaymentRepository repository) : CommandHandler<RequestPaymentCommand>
+public class RequestPaymentCommandHandler : CommandHandler<RequestPaymentCommand>
 {
+    private readonly PaymentRepository _repository;
+    private readonly ILogger<RequestPaymentCommandHandler> _logger;
+
+    public RequestPaymentCommandHandler(
+        PaymentRepository repository,
+        ILogger<RequestPaymentCommandHandler> logger)
+    {
+        _repository = repository;
+        _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+    }
+
     protected override async Task<IResult> HandleAsync(RequestPaymentCommand request, CancellationToken cancellationToken)
     {
+        _logger.LogInformation(
+            "Creating payment. OrderId: {OrderId}, CustomerId: {CustomerId}, Amount: {Amount} RUB",
+            request.Message.OrderId,
+            request.Message.UserId,
+            request.Message.Summary.Rub);
+
         var payment = new Payment
         {
             OrderId = request.Message.OrderId,
@@ -24,8 +41,13 @@ public class RequestPaymentCommandHandler(PaymentRepository repository) : Comman
             Summary = Money.FromRub(request.Message.Summary.Rub)
         };
 
-        await repository.AddAsync(payment, cancellationToken);
-        await repository.UnitOfWork.SaveChangesAsync(cancellationToken);
+        await _repository.AddAsync(payment, cancellationToken);
+        await _repository.UnitOfWork.SaveChangesAsync(cancellationToken);
+
+        _logger.LogInformation(
+            "Payment created successfully. PaymentId: {PaymentId}, OrderId: {OrderId}",
+            payment.Id,
+            request.Message.OrderId);
 
         return Result.Success();
     }

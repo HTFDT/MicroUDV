@@ -8,11 +8,24 @@ namespace InventoryService.Application.Products.Queries.GetProducts;
 
 public class GetProductsQuery : Query<List<ProductItemDto>>;
 
-public class GetProductsQueryHandler(IProductRepository repository) : QueryHandler<GetProductsQuery, List<ProductItemDto>>
+public class GetProductsQueryHandler : QueryHandler<GetProductsQuery, List<ProductItemDto>>
 {
+    private readonly IProductRepository _repository;
+    private readonly ILogger<GetProductsQueryHandler> _logger;
+
+    public GetProductsQueryHandler(
+        IProductRepository repository,
+        ILogger<GetProductsQueryHandler> logger)
+    {
+        _repository = repository;
+        _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+    }
+
     protected override async Task<IResult<List<ProductItemDto>>> HandleAsync(GetProductsQuery request, CancellationToken cancellationToken)
     {
-        var products = await repository.QueryAsync(q => q.Select(p => new ProductItemDto
+        var stopwatch = System.Diagnostics.Stopwatch.StartNew();
+
+        var products = await _repository.QueryAsync(q => q.Select(p => new ProductItemDto
         {
             Id = p.Id,
             Name = p.Name,
@@ -24,6 +37,13 @@ public class GetProductsQueryHandler(IProductRepository repository) : QueryHandl
                 ReservedQuantity = r.Quantity
             }).ToList()
         }), cancellationToken);
+
+        stopwatch.Stop();
+
+        _logger.LogInformation(
+            "Retrieved {ProductCount} products in {ElapsedMilliseconds}ms",
+            products.Count(),
+            stopwatch.ElapsedMilliseconds);
 
         return Result<List<ProductItemDto>>.Success(products.ToList());
     }

@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using SagaCoordinator.Infrastructure.Storage.EFCore;
@@ -11,9 +12,11 @@ using SagaCoordinator.Infrastructure.Storage.EFCore;
 namespace SagaCoordinator.Infrastructure.Storage.EFCore.Migrations
 {
     [DbContext(typeof(SagasDbContext))]
-    partial class SagasDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260108221336_AddSagaState")]
+    partial class AddSagaState
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder

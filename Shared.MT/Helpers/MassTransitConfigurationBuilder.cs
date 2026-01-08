@@ -141,14 +141,27 @@ public class SagaStateMachinesConfigurationBuilder : IBuilder<Action<IBusRegistr
         _usingInMemory = true;
     }
 
-    public void UsingEntityFrameworkRepository<TDbContext>() where TDbContext : DbContext
+    public void UsingEntityFrameworkRepository<TDbContext>(Action<EntityFrameworkRepositoryOptions> efCfg) where TDbContext : DbContext
     {
         var cfg = (IBusRegistrationConfigurator x) =>
         {
+            var opts = new EntityFrameworkRepositoryOptions();
+            efCfg.Invoke(opts);
             x.SetEntityFrameworkSagaRepositoryProvider(i =>
             {
+                i.ConcurrencyMode = ConcurrencyMode.Pessimistic;
                 i.UsePostgres();
-                i.ExistingDbContext<TDbContext>();
+                if (opts.UseExistingDbContext)
+                    i.ExistingDbContext<TDbContext>();
+                else
+                    i.AddDbContext<DbContext, TDbContext>((provider, builder) =>
+                    {
+                        builder.UseNpgsql(opts.ConnectionString, m =>
+                        {
+                            m.MigrationsAssembly(opts.MigrationsAssembly!);
+                            m.MigrationsHistoryTable(opts.MigrationsHistoryTable!);
+                        });
+                    });
             });
         };
         _usingEf = new (true, cfg);
@@ -185,4 +198,12 @@ public class ConfigureEndpointsCallbackOptions
     public bool UseRedelivery { get; set; }
     public uint Retries { get; set; }
     public bool UseInMemoryOutbox { get; set; }
+}
+
+public class EntityFrameworkRepositoryOptions
+{
+    public bool UseExistingDbContext { get; set; }
+    public string? ConnectionString { get; set; }
+    public Assembly? MigrationsAssembly { get; set; }
+    public string? MigrationsHistoryTable { get; set; }
 }

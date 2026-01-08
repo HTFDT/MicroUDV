@@ -23,7 +23,7 @@ builder.Services.AddSwaggerGen();
 
 builder.Services.AddControllers();
 
-builder.Services.AddCustomDbContext<OrderDbContext>(cfg =>
+builder.Services.AddUnitOfWorkDbcontext<OrderDbContext>(cfg =>
 {
     cfg.ConnectionString = builder.Configuration["conn"]!;
 })

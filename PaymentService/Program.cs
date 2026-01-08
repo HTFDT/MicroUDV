@@ -21,7 +21,7 @@ builder.Host.UseSerilog();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-builder.Services.AddCustomDbContext<PaymentDbContext>(cfg =>
+builder.Services.AddUnitOfWorkDbcontext<PaymentDbContext>(cfg =>
 {
     cfg.ConnectionString = builder.Configuration["conn"]!;
 })

@@ -1,4 +1,4 @@
-using MassTransit;
+using Microsoft.EntityFrameworkCore;
 using SagaCoordinator.Infrastructure.Storage.EFCore;
 using Shared.EF.Helpers;
 using Shared.MT.Helpers;
@@ -7,9 +7,9 @@ var builder = Host.CreateApplicationBuilder(args);
 
 var asm = typeof(Program).Assembly;
 
-builder.Services.AddCustomDbContext<SagasDbContext>(cfg =>
+builder.Services.AddDbContext<SagasDbContext>(o =>
 {
-    cfg.ConnectionString = builder.Configuration["conn"]!;
+    o.UseNpgsql(builder.Configuration["conn"]!);
 });
 
 builder.Services.AddMassTransitCustom(b =>
@@ -20,7 +20,13 @@ builder.Services.AddMassTransitCustom(b =>
     if (builder.Environment.IsDevelopment())
         smCfg.UsingInMemoryRepository();
     else
-        smCfg.UsingEntityFrameworkRepository<SagasDbContext>();
+        smCfg.UsingEntityFrameworkRepository<SagasDbContext>(o =>
+        {
+            o.UseExistingDbContext = false;
+            o.ConnectionString = builder.Configuration["conn"]!;
+            o.MigrationsAssembly = asm;
+            o.MigrationsHistoryTable = $"__EFMigrationsHistory";
+        });
 
     b.AddConfigureEndpointsCallback(o =>
     {

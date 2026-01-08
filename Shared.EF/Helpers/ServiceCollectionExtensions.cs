@@ -33,7 +33,7 @@ public static class ServiceCollectionExtensions
         return services;
     }
 
-    public static IServiceCollection AddCustomDbContext<TDbContext>(this IServiceCollection services, Action<DbOptions> cfg) 
+    public static IServiceCollection AddUnitOfWorkDbcontext<TDbContext>(this IServiceCollection services, Action<DbOptions> cfg) 
         where TDbContext : DbContext, IUnitOfWork
     {
         var opt = new DbOptions();

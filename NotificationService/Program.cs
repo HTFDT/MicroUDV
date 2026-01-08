@@ -21,7 +21,7 @@ builder.Host.UseSerilog();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-builder.Services.AddCustomDbContext<NotificationDbContext>(cfg =>
+builder.Services.AddUnitOfWorkDbcontext<NotificationDbContext>(cfg =>
 {
     cfg.ConnectionString = builder.Configuration["conn"]!;
 })

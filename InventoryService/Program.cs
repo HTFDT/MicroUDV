@@ -21,7 +21,7 @@ builder.Host.UseSerilog();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-builder.Services.AddCustomDbContext<InventoryDbContext>(cfg =>
+builder.Services.AddUnitOfWorkDbcontext<InventoryDbContext>(cfg =>
 {
     cfg.ConnectionString = builder.Configuration["conn"]!;
 })

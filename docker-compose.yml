@@ -1,0 +1,225 @@
+name: order-system
+
+x-rabbitmq-env: &rabbitmq-env
+  RabbitMq__Host: rabbitmq
+  RabbitMq__UserName: guest
+  RabbitMq__Password: guest
+  RabbitMq__VirtualHost: /
+
+x-aspnet-env: &aspnet-env
+  ASPNETCORE_URLS: http://+:8080
+  ASPNETCORE_ENVIRONMENT: Release
+
+services:
+  rabbitmq:
+    image: rabbitmq:3.13-management
+    container_name: rabbitmq
+    environment:
+      RABBITMQ_DEFAULT_USER: guest
+      RABBITMQ_DEFAULT_PASS: guest
+      RABBITMQ_DEFAULT_VHOST: /
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    networks: [backend]
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+
+  order-db:
+    image: postgres:16-alpine
+    container_name: order-db
+    environment:
+      POSTGRES_DB: order_db
+      POSTGRES_USER: order_user
+      POSTGRES_PASSWORD: orderpwd
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U order_user -d order_db"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+    networks: [backend]
+    volumes:
+      - order_db_data:/var/lib/postgresql/data
+
+  inventory-db:
+    image: postgres:16-alpine
+    container_name: inventory-db
+    environment:
+      POSTGRES_DB: inventory_db
+      POSTGRES_USER: inventory_user
+      POSTGRES_PASSWORD: inventorypwd
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U inventory_user -d inventory_db"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+    networks: [backend]
+    volumes:
+      - inventory_db_data:/var/lib/postgresql/data
+
+  payment-db:
+    image: postgres:16-alpine
+    container_name: payment-db
+    environment:
+      POSTGRES_DB: payment_db
+      POSTGRES_USER: payment_user
+      POSTGRES_PASSWORD: paymentpwd
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U payment_user -d payment_db"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+    networks: [backend]
+    volumes:
+      - payment_db_data:/var/lib/postgresql/data
+
+  notification-db:
+    image: postgres:16-alpine
+    container_name: notification-db
+    environment:
+      POSTGRES_DB: notification_db
+      POSTGRES_USER: notification_user
+      POSTGRES_PASSWORD: notificationpwd
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U notification_user -d notification_db"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+    networks: [backend]
+    volumes:
+      - notification_db_data:/var/lib/postgresql/data
+
+  saga-db:
+    image: postgres:16-alpine
+    container_name: saga-db
+    environment:
+      POSTGRES_DB: saga_db
+      POSTGRES_USER: saga_user
+      POSTGRES_PASSWORD: sagapwd
+    ports: 
+      - 5432:5432
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U saga_user -d saga_db"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+    networks: [backend]
+    volumes:
+      - saga_db_data:/var/lib/postgresql/data
+
+  order-service:
+    container_name: order-service
+    build:
+      context: .
+      dockerfile: ./OrderService/Dockerfile
+      args:
+        BUILD_CONFIGURATION: Release
+    image: order-system/order-service:latest
+    environment:
+      <<: [*aspnet-env, *rabbitmq-env]
+      conn: Host=order-db;Port=5432;Database=order_db;Username=order_user;Password=orderpwd
+    ports:
+      - "5001:8080"
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+      order-db:
+        condition: service_healthy
+    networks: [backend]
+
+  inventory-service:
+    container_name: inventory-service
+    build:
+      context: .
+      dockerfile: ./InventoryService/Dockerfile
+      args:
+        BUILD_CONFIGURATION: Release
+    image: order-system/inventory-service:latest
+    environment:
+      <<: [*aspnet-env, *rabbitmq-env]
+      conn: Host=inventory-db;Port=5432;Database=inventory_db;Username=inventory_user;Password=inventorypwd
+    ports:
+      - "5002:8080"
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+      inventory-db:
+        condition: service_healthy
+    networks: [backend]
+
+  payment-service:
+    container_name: payment-service
+    build:
+      context: .
+      dockerfile: ./PaymentService/Dockerfile
+      args:
+        BUILD_CONFIGURATION: Release
+    image: order-system/payment-service:latest
+    environment:
+      <<: [*aspnet-env, *rabbitmq-env]
+      conn: Host=payment-db;Port=5432;Database=payment_db;Username=payment_user;Password=paymentpwd
+    ports:
+      - "5003:8080"
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+      payment-db:
+        condition: service_healthy
+    networks: [backend]
+
+  notification-service:
+    container_name: notification-service
+    build:
+      context: .
+      dockerfile: ./NotificationService/Dockerfile
+      args:
+        BUILD_CONFIGURATION: Release
+    image: order-system/notification-service:latest
+    environment:
+      <<: [*aspnet-env, *rabbitmq-env]
+      conn: Host=notification-db;Port=5432;Database=notification_db;Username=notification_user;Password=notificationpwd
+    ports:
+      - "5004:8080"
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+      notification-db:
+        condition: service_healthy
+    networks: [backend]
+
+  saga-coordinator:
+    container_name: saga-coordinator
+    build:
+      context: .
+      dockerfile: ./SagaCoordinator/Dockerfile
+      args:
+        BUILD_CONFIGURATION: Release
+    image: order-system/saga-coordinator:latest
+    environment:
+      <<: [*aspnet-env, *rabbitmq-env]
+      conn: Host=saga-db;Port=5432;Database=saga_db;Username=saga_user;Password=sagapwd
+    ports:
+      - "5005:8080"
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+      saga-db:
+        condition: service_healthy
+    networks: [backend]
+
+networks:
+  backend:
+    driver: bridge
+
+volumes:
+  rabbitmq_data:
+  order_db_data:
+  inventory_db_data:
+  payment_db_data:
+  notification_db_data:
+  saga_db_data:

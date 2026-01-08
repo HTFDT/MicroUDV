@@ -7,6 +7,8 @@ using Serilog;
 
 var builder = WebApplication.CreateBuilder(args);
 
+var asm = typeof(Program).Assembly;
+
 Log.Logger = new LoggerConfiguration()
     .MinimumLevel.Information()
     .Enrich.FromLogContext()
@@ -29,7 +31,7 @@ builder.Services.AddCustomDbContext<OrderDbContext>(cfg =>
 
 builder.Services.AddMassTransitCustom(b =>
 {
-    b.AddConsumers();
+    b.AddConsumers(asm);
 
     b.AddConfigureEndpointsCallback(o =>
     {
@@ -43,19 +45,16 @@ builder.Services.AddMassTransitCustom(b =>
 
     var transportCfg = b.Transport();
 
-    if (builder.Environment.IsDevelopment())
-        transportCfg.UsingInMemory();
-    else
-        transportCfg.UsingRabbitMq(o =>
-        {
-            o.Host = builder.Configuration["RabbitMq:Host"]!;
-            o.VirtualHost = builder.Configuration["RabbitMq:VirtualHost"]!;
-            o.UserName = builder.Configuration["RabbitMq:UserName"]!;
-            o.Password = builder.Configuration["RabbitMq:Password"]!;
-        });
+    transportCfg.UsingRabbitMq(o =>
+    {
+        o.Host = builder.Configuration["RabbitMq:Host"]!;
+        o.VirtualHost = builder.Configuration["RabbitMq:VirtualHost"]!;
+        o.UserName = builder.Configuration["RabbitMq:UserName"]!;
+        o.Password = builder.Configuration["RabbitMq:Password"]!;
+    });
 });
 
-builder.Services.AddCqs();
+builder.Services.AddCqs(asm);
 EndpointConventionMapper.MapEndpoints();
 
 var app = builder.Build();

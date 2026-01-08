@@ -20,7 +20,7 @@ public static class ServiceCollectionExtensions
 
         services.AddScoped<DefaultMessenger>();
         services.AddScoped<IMessageSender>(sp => sp.GetRequiredService<DefaultMessenger>());
-        services.AddScoped<IMessageSender>(sp => sp.GetRequiredService<DefaultMessenger>());
+        services.AddScoped<IMessagePublisher>(sp => sp.GetRequiredService<DefaultMessenger>());
 
         return services;
     }

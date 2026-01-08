@@ -2,7 +2,7 @@ using NotificationService.Application.Notifications.Commands.CompleteOrder;
 using Shared.Application.Infrastructure.Cqs.Abstractions;
 using Shared.Application.Orders.Messages.Events;
 using Shared.MT.Application.Infrastructure.Messenging;
-
+using IResult = Shared.Application.Infrastructure.Results.Abstractions.IResult;
 
 namespace NotificationService.Application.Notifications.Consumers;
 

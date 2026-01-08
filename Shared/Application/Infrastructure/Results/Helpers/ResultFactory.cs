@@ -10,17 +10,19 @@ public static class ResultFactory
     {
         var type = typeof(TResult);
         object? result = null;
-        if (type == typeof(Result))
+        if (type == typeof(IResult))
         {
-            result = type.InvokeMember(nameof(Result.Success), BindingFlags.InvokeMethod, null, null, null);
+            result = typeof(Result).InvokeMember(nameof(Result.Success), BindingFlags.InvokeMethod, null, null, null);
         }
-        else if (type.IsGenericType && type.GetGenericTypeDefinition() == typeof(Result<>))
+        else if (type.IsGenericType && type.GetGenericTypeDefinition() == typeof(IResult<>))
         {
             var valueType = value?.GetType();
             var genericParamType = type.GetGenericArguments().FirstOrDefault();
             if (value != null && valueType != genericParamType)
                 throw new ArgumentException("Invalid value type", nameof(value));
-            result = type.InvokeMember(nameof(Result<object>.Success), BindingFlags.InvokeMethod, null, null, [value]);
+            var pms = type.GetGenericArguments();
+            var implType = typeof(Result<>).MakeGenericType(pms);
+            result = implType.InvokeMember(nameof(Result<object>.Success), BindingFlags.InvokeMethod, null, null, [value]);
         }
         if (result == null)
             throw new NotSupportedException("Result type is not supported");

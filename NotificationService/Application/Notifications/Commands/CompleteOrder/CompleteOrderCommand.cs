@@ -19,7 +19,7 @@ public class CompleteOrderCommandHandler(INotificationRepository repository) : C
         var notification = new Notification()
         {
             UserId = request.Message.UserId,
-            Text = request.Message.IsSuccessful ? "Заказ успешно оформлен" : "Заказ отменен"
+            Text = request.Message.IsSuccessful ? "Заказ успешно оформлен." : $"Заказ отменен. Причина:\n{request.Message.Reason}"
         };
 
         await repository.AddAsync(notification, cancellationToken);

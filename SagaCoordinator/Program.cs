@@ -1,8 +1,11 @@
+using MassTransit;
 using SagaCoordinator.Infrastructure.Storage.EFCore;
 using Shared.EF.Helpers;
 using Shared.MT.Helpers;
 
 var builder = Host.CreateApplicationBuilder(args);
+
+var asm = typeof(Program).Assembly;
 
 builder.Services.AddCustomDbContext<SagasDbContext>(cfg =>
 {
@@ -11,9 +14,8 @@ builder.Services.AddCustomDbContext<SagasDbContext>(cfg =>
 
 builder.Services.AddMassTransitCustom(b =>
 {
-    b.AddConsumers();
-    var smCfg = b.AddSagas()
-        .AddSagaStateMachines();
+    b.AddConsumers(asm);
+    var smCfg = b.AddSagaStateMachines(asm);
     
     if (builder.Environment.IsDevelopment())
         smCfg.UsingInMemoryRepository();
@@ -32,16 +34,13 @@ builder.Services.AddMassTransitCustom(b =>
     
     var transportCfg = b.Transport();
 
-    if (builder.Environment.IsDevelopment())
-        transportCfg.UsingInMemory();
-    else
-        transportCfg.UsingRabbitMq(o =>
-        {
-            o.Host = builder.Configuration["RabbitMq:Host"]!;
-            o.VirtualHost = builder.Configuration["RabbitMq:VirtualHost"]!;
-            o.UserName = builder.Configuration["RabbitMq:UserName"]!;
-            o.Password = builder.Configuration["RabbitMq:Password"]!;
-        });
+    transportCfg.UsingRabbitMq(o =>
+    {
+        o.Host = builder.Configuration["RabbitMq:Host"]!;
+        o.VirtualHost = builder.Configuration["RabbitMq:VirtualHost"]!;
+        o.UserName = builder.Configuration["RabbitMq:UserName"]!;
+        o.Password = builder.Configuration["RabbitMq:Password"]!;
+    });
 });
 
 EndpointConventionMapper.MapEndpoints();

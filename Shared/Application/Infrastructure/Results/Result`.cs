@@ -18,7 +18,6 @@ public class Result<TValue> : Result, IResult<TValue>
 
     public static Result<TValue> Success(TValue value)
     {
-        ArgumentNullException.ThrowIfNull(value);
         return new Result<TValue>(value);
     }
 

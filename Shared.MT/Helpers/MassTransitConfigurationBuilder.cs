@@ -9,9 +9,9 @@ namespace Shared.MT.Helpers;
 public class MassTransitConfigurationBuilder : IBuilder<Action<IBusRegistrationConfigurator>>
 {
     private readonly TransportConfigurationBuilder _tcb = new();
-    private readonly SagasConfigurationBuilder _scb = new();
-    private bool _sagasAdded;
-    private bool _consumersAdded;
+    private readonly SagaStateMachinesConfigurationBuilder _smcb = new();
+    private FlagAndValue<Assembly> _consumersAdded = new (false);
+    private FlagAndValue<Assembly> _stateMachinesAdded = new (false);
     private FlagAndValue<Action<IBusRegistrationConfigurator>> _efOutbox = new (false);
     private FlagAndValue<ConfigureEndpointsCallbackOptions> _cfgEndpointsCallback = new (false);
 
@@ -20,15 +20,15 @@ public class MassTransitConfigurationBuilder : IBuilder<Action<IBusRegistrationC
         return _tcb;
     }
 
-    public SagasConfigurationBuilder AddSagas()
+    public SagaStateMachinesConfigurationBuilder AddSagaStateMachines(Assembly asm)
     {
-        _sagasAdded = true;
-        return _scb;
+        _stateMachinesAdded = new FlagAndValue<Assembly>(true, asm);
+        return _smcb;
     }
 
-    public void AddConsumers()
+    public void AddConsumers(Assembly assembly)
     {
-        _consumersAdded = true;
+        _consumersAdded = new FlagAndValue<Assembly>(true, assembly);;
     }
 
     public void AddEntityFrameworkOutbox<TDbContext>() where TDbContext : DbContext
@@ -56,13 +56,20 @@ public class MassTransitConfigurationBuilder : IBuilder<Action<IBusRegistrationC
     {
         var action = (IBusRegistrationConfigurator x) =>
         {
-            var asm = Assembly.GetExecutingAssembly();
-            if (_consumersAdded)
-                x.AddConsumers(asm);
-            if (_sagasAdded)
-                x.AddSagas(asm);
+            x.SetKebabCaseEndpointNameFormatter();
+            if (_consumersAdded.Item1)
+                x.AddConsumers(_consumersAdded.Item2);
+            if (_stateMachinesAdded.Item1)
+            {
+                x.AddSagaStateMachines(_stateMachinesAdded.Item2);
+                _smcb.Build().Invoke(x);
+            }
+            
             if (_efOutbox.Item1)
                 _efOutbox.Item2!.Invoke(x);
+
+            _tcb.Build().Invoke(x);
+            
             if (_cfgEndpointsCallback.Item1)
             {
                 var opts = _cfgEndpointsCallback.Item2!;
@@ -73,12 +80,11 @@ public class MassTransitConfigurationBuilder : IBuilder<Action<IBusRegistrationC
                     if (opts.Retries > 0)
                         cfg.UseMessageRetry(r => r.Immediate((int)opts.Retries));
                     if (opts.UseInMemoryOutbox)
-                        cfg.UseInMemoryInboxOutbox(context);
+                        cfg.UseInMemoryOutbox(context);
                 });
-            }
-                
+            }      
         };
-        return action + _scb.Build() + _tcb.Build();
+        return action;
     }
 }
 
@@ -122,33 +128,6 @@ public class TransportConfigurationBuilder : IBuilder<Action<IBusRegistrationCon
                 return;
             }
         };
-    }
-}
-
-
-public class SagasConfigurationBuilder : IBuilder<Action<IBusRegistrationConfigurator>>
-{
-    private readonly SagaStateMachinesConfigurationBuilder _smcb = new();
-    private bool _stateMachinesAdded;
-
-    public SagaStateMachinesConfigurationBuilder AddSagaStateMachines()
-    {
-        _stateMachinesAdded = true;
-        return _smcb;
-    }
-
-    public Action<IBusRegistrationConfigurator> Build()
-    {
-        var action = (IBusRegistrationConfigurator x) =>
-        {
-            if (_stateMachinesAdded)
-            {
-                var asm = Assembly.GetExecutingAssembly();
-                x.AddSagaStateMachines(asm);
-            }
-        };
-
-        return action + _smcb.Build();
     }
 }
 

@@ -16,7 +16,8 @@ public class RequestPaymentConsumer(ISender sender) : ConsumerBase<RequestPaymen
         {
             await ConsumeContext.RespondAsync(new PaymentFailed
             {
-                OrderId = ConsumeContext.Message.OrderId
+                OrderId = ConsumeContext.Message.OrderId,
+                Reason = "Оплата не прошла."
             });
             return;
         }

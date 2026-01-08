@@ -1,8 +1,6 @@
-using Shared.Domain.Types;
-
 namespace Shared.Application.Shared.Messages;
 
-public class MoneyMessage(Money money)
+public class MoneyMessage
 {
-    public double Rub { get ; set; } = money.Rub; 
+    public double Rub { get ; set; }
 }

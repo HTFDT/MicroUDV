@@ -5,7 +5,7 @@ namespace Shared.Domain.Storage.Abstractions;
 
 public abstract class ReadOnlyRepositoryBase<T> : IReadOnlyRepository<T> where T : IEntity, IAggregateRoot
 {
-    public bool IsReadOnly { get; private set; }
+    public bool IsReadOnly { get; set; }
     public abstract Task<T?> FindAsync(object[] keyValues, CancellationToken cancellationToken = default);
     public abstract Task<T> FirstAsync(Expression<Func<T, bool>>? predicate = null, CancellationToken cancellationToken = default);
     public abstract Task<T?> FirstOrDefaultAsync(Expression<Func<T, bool>>? predicate = null, CancellationToken cancellationToken = default);

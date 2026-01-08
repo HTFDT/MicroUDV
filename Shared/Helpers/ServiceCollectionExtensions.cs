@@ -7,11 +7,11 @@ namespace Shared.Helpers;
 
 public static class ServiceCollectionExtensions
 {
-    public static IServiceCollection AddCqs(this IServiceCollection services)
+    public static IServiceCollection AddCqs(this IServiceCollection services, Assembly assembly)
     {
         services.AddMediatR(o =>
         {
-            o.RegisterServicesFromAssembly(Assembly.GetExecutingAssembly());
+            o.RegisterServicesFromAssembly(assembly);
         });
         services.AddTransient<ISender, Sender>();
         return services;

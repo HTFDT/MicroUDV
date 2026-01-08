@@ -28,6 +28,7 @@ public class CompleteOrderCommandHandler(IProductRepository repository) : Comman
             {
                 product.Reservations = product.Reservations.Where(r => r.OrderId != request.Message.OrderId).ToList();
             }
+            await repository.UnitOfWork.SaveChangesAsync(cancellationToken);
             return Result.Success();
         }
 
@@ -38,6 +39,7 @@ public class CompleteOrderCommandHandler(IProductRepository repository) : Comman
             product.Reservations = product.Reservations.Except(reservationsToDelete).ToList();
             product.InStockQuantity += sum;
         }
+        await repository.UnitOfWork.SaveChangesAsync(cancellationToken);
         return Result.Success();
     }
 }

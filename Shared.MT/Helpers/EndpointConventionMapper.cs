@@ -9,6 +9,6 @@ public static class EndpointConventionMapper
     {
         EndpointConvention.Map<RequestPayment>(new Uri("queue:request-payment"));
         EndpointConvention.Map<SetOrderStatus>(new Uri("queue:set-order-status"));
-        EndpointConvention.Map<RequestPayment>(new Uri("queue:reserve-stock"));
+        EndpointConvention.Map<ReserveStock>(new Uri("queue:reserve-stock"));
     }
 }

@@ -18,7 +18,8 @@ public class ReserveStockConsumer(ISender sender) : ConsumerBase<ReserveStock>
         {
             await ConsumeContext.RespondAsync(new StockFailed
             {
-                OrderId = ConsumeContext.Message.OrderId
+                OrderId = ConsumeContext.Message.OrderId,
+                Reason = "Недостаточно единиц товара на складе."
             });
             return;
         }
@@ -26,7 +27,10 @@ public class ReserveStockConsumer(ISender sender) : ConsumerBase<ReserveStock>
         await ConsumeContext.RespondAsync(new StockReserved
         {
             OrderId = ConsumeContext.Message.OrderId,
-            Summary = new MoneyMessage(res.Value)
+            Summary = new MoneyMessage
+            {
+                Rub = res.Value.Rub
+            }
         });
     }
 }

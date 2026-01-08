@@ -11,19 +11,68 @@ namespace InventoryService.Application.Products;
 
 [ApiController]
 [Route("api")]
-public class OrderController(ISender sender) : ControllerBase
+public class ProductController : ControllerBase
 {
+    private readonly ISender _sender;
+    private readonly ILogger<ProductController> _logger;
+
+    public ProductController(ISender sender, ILogger<ProductController> logger)
+    {
+        _sender = sender;
+        _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+    }
+
     [HttpPost("products")]
     public async Task<IActionResult> CreateProduct(CreateProductDto dto)
     {
-        var result = await sender.SendAsync<CreateProductCommand, Abs.IResult>(new CreateProductCommand(dto));
+        _logger.LogInformation(
+            "CreateProduct called. Product: {ProductName}, Price: {Price}, Stock: {Stock}",
+            dto.Name ?? "unknown",
+            dto.PriceRub,
+            dto.InStockQuantity);
+
+        var result = await _sender.SendAsync<CreateProductCommand, Abs.IResult>(new CreateProductCommand(dto));
+
+        if (result.IsSuccessful)
+        {
+            _logger.LogInformation(
+                "Product created successfully. Product: {CustomerName}",
+                dto.Name ?? "unknown");
+        }
+        else
+        {
+            foreach (var item in result.GetErrors())
+            {
+                _logger.LogWarning(
+                    "Product creation failed. Error: {ErrorType}",
+                    item.Type.ToString() ?? "unknown");
+            }
+        }
+
         return result.ToActionResult();
     }
 
     [HttpGet("products")]
     public async Task<IActionResult> GetProducts()
     {
-        var result = await sender.SendAsync<GetProductsQuery, Abs.IResult<List<ProductItemDto>>>(new GetProductsQuery());
+        _logger.LogInformation("GetProducts called");
+
+        var result = await _sender.SendAsync<GetProductsQuery, Abs.IResult<List<ProductItemDto>>>(new GetProductsQuery());
+
+        if (result.IsSuccessful)
+        {
+            _logger.LogInformation("Retrieve products successfully");
+        }
+        else
+        {
+            foreach (var item in result.GetErrors())
+            {
+                _logger.LogWarning(
+                    "Product retrieving failed. Error: {ErrorType}",
+                    item.Type.ToString() ?? "unknown");
+            }
+        }
+
         return result.ToActionResult();
     }
 } 

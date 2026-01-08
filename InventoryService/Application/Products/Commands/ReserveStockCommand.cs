@@ -14,16 +14,38 @@ public class ReserveStockCommand(ReserveStock message) : Command<Money>
     public ReserveStock Message { get; set; } = message;
 }
 
-public class ReserveStockCommandHandler(IProductRepository repository) : CommandHandler<ReserveStockCommand, Money>
+public class ReserveStockCommandHandler : CommandHandler<ReserveStockCommand, Money>
 {
+    private readonly IProductRepository _repository;
+    private readonly ILogger<ReserveStockCommandHandler> _logger;
+
+    public ReserveStockCommandHandler(
+        IProductRepository repository,
+        ILogger<ReserveStockCommandHandler> logger)
+    {
+        _repository = repository;
+        _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+    }
+
     protected override async Task<IResult<Money>> HandleAsync(ReserveStockCommand request, CancellationToken cancellationToken)
     {
+        _logger.LogInformation(
+            "Reserving stock for order. OrderId: {OrderId}, Products: {ProductCount}",
+            request.Message.OrderId,
+            request.Message.Products.Count);
+
         var productIds = request.Message.Products.Select(p => p.ProductId).ToList();
 
-        var products = await repository.ListAsync(p => productIds.Contains(p.Id), cancellationToken);
+        var products = await _repository.ListAsync(p => productIds.Contains(p.Id), cancellationToken);
 
         if (products.Count != productIds.Count)
+        {
+            _logger.LogWarning(
+                "Not all products exist. Requested: {RequestedCount}, Found: {FoundCount}",
+                productIds.Count,
+                products.Count);
             return Result<Money>.Error(new BadInputDataError(request.Message, "not all products exist"));
+        }
 
         var productIdToData = request.Message.Products.ToDictionary(p => p.ProductId, p => p);
         var productIdToProduct = products.ToDictionary(p => p.Id, p => p);
@@ -38,7 +60,14 @@ public class ReserveStockCommandHandler(IProductRepository repository) : Command
                 continue;
             
             if (data.Quantity > entity.InStockQuantity)
+            {
+                _logger.LogWarning(
+                    "Insufficient stock. ProductId: {ProductId}, Requested: {Quantity}, Available: {InStock}",
+                    entity.Id,
+                    data.Quantity,
+                    entity.InStockQuantity);
                 return Result<Money>.Error(new BadInputDataError(request.Message, $"doesn't have enough product {entity.Id} in stock"));
+            }
             
             entity.InStockQuantity -= data.Quantity;
 
@@ -52,7 +81,12 @@ public class ReserveStockCommandHandler(IProductRepository repository) : Command
             sum += entity.Price;
         }
 
-        await repository.UnitOfWork.SaveChangesAsync(cancellationToken);
+        await _repository.UnitOfWork.SaveChangesAsync(cancellationToken);
+
+        _logger.LogInformation(
+            "Stock reserved successfully. OrderId: {OrderId}, Total price: {TotalPrice}",
+            request.Message.OrderId,
+            sum);
 
         return Result<Money>.Success(sum);
     }
